@@ -30,7 +30,7 @@ async function externalSort(inputFilename, outputFilename, memoryLimit) {
     const inputReader = readline.createInterface({ input });
     let block = await readBlock(inputReader, memoryLimit);
     while (block.length > 0) {
-        block.sort();
+        block.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
         const tempFilename = `${TEMP_DIR}/temp_${tempFiles.length}.txt`;
         const tempOutput = fs.createWriteStream(tempFilename);
         await writeBlock(block, tempOutput);
@@ -51,14 +51,14 @@ async function externalSort(inputFilename, outputFilename, memoryLimit) {
             fs.unlinkSync(tempFilename);
         }
     }
-    heap.sort((a, b) => a.line.localeCompare(b.line));
+    heap.sort((a, b) => a.line.localeCompare(b.line, 'en', { sensitivity: 'base' }));
     while (heap.length > 0) {
         const { line, reader } = heap.shift();
         output.write(line + '\n');
         const nextLine = await reader[Symbol.asyncIterator]().next();
         if (!nextLine.done) {
             heap.push({ line: nextLine.value, reader });
-            heap.sort((a, b) => a.line.localeCompare(b.line));
+            heap.sort((a, b) => a.line.localeCompare(b.line, 'en', { sensitivity: 'base' }));
         } else {
             reader.close();
         }
